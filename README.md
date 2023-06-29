@@ -1,7 +1,7 @@
 # Eric's Reddit TTS Bot
 Reddit text-to-speech videos are a popular form of low-effort yet mildly engaging content which is common throughout many short-form video platforms. The goal of this project is to fully automate the production of such videos.
 ### Basic Usage
-Install FFMPEG, ImageMagick, and the necessary Python dependencies (`requirements.txt`). Using a virtual environment is recommended. 
+Install FFMPEG, ImageMagick, Firefox, and the necessary Python dependencies (`requirements.txt`). Using a virtual environment is recommended. 
 
 Run `main.py` to produce a video. There are many flags you may add for increased customization, but the below command includes the bare minimum:
 ```
