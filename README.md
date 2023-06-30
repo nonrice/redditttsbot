@@ -7,10 +7,7 @@ Run `main.py` to produce a video. There are many flags you may add for increased
 ```
 python main.py --background /path/to/background/video
 ```
-
-I may make another page documenting the rest of the flags soon, but at the moment you can simply look in the source code and infer the meaning of each flag.
+Look at [configuration.md](configuration.md) for documentation on additional configuration flags.
 
 ### Caveats
-At the moment, the background footage must be a 1080p vertical video, since the dimensions of other elements (e.g. subtitles) are hardcoded in. I will probably change this later.
-
 Text to speech generation only works on OS X, at the moment. If you are not a Mac user you should modify the text to speech commands (`os.system("say...`) to use the appropriate TTS utility for your platform. If other people actually use this project I might upgrade this part to be more cross-platform. 

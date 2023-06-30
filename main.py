@@ -27,6 +27,12 @@ parser.add_argument("--subtitle-outline-size", action="store", default=14, type=
 parser.add_argument("--background", action="store", required=True)
 parser.add_argument("--random-cutout", action="store_true")
 parser.add_argument("--headless", action="store_true")
+parser.add_argument("--subtitle-side-padding", action="store", default=50, type=int)
+parser.add_argument("--subtitle-color", action="store", default="white")
+parser.add_argument("--subtitle-outline-color", action="store", default="black")
+parser.add_argument("--post-width", action="store", default=1000, type=int)
+parser.add_argument("--post-content-max-width", action="store", default=60, type=int)
+parser.add_argument("--post-content-padding", action="store", default=3, type=int)
 args = parser.parse_args()
 
 # Scrape video content (post and comment)
@@ -37,15 +43,21 @@ selected_comment = ""
 selected_post = ""
 for post in posts:
     post_id = post["data"]["id"]
-    comments = requests.get(f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top", headers=header).json()
-    random.shuffle(comments)
     found_comment = False
-    for comment in comments[1]["data"]["children"][1:-1]:
-        if args.min_len <= len(comment["data"]["body"]) <= args.min_len + args.len_range:
-            selected_comment = comment["data"]["body"]
+    if args.use_post:
+        if args.min_len <= len(post["data"]["selftext"]) <= args.min_len + args.len_range:
+            selected_comment = post["data"]["selftext"]
             selected_post = post["data"]["title"]
             found_comment = True
-            break
+    else:
+        comments = requests.get(f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top", headers=header).json()
+        random.shuffle(comments)
+        for comment in comments[1]["data"]["children"][1:-1]:
+            if args.min_len <= len(comment["data"]["body"]) <= args.min_len + args.len_range:
+                selected_comment = comment["data"]["body"]
+                selected_post = post["data"]["title"]
+                found_comment = True
+                break
     if found_comment: break
 selected_comment = selected_comment.replace("'", "'\\''")
 selected_post = selected_post.replace("'", "'\\''")
@@ -59,13 +71,15 @@ if args.headless:
     firefox_args.add_argument("-headless")
 driver = webdriver.Firefox(options = firefox_args)
 driver.get(f"https://sh.reddit.com/r/AskReddit/comments/{post_id}/")
-driver.execute_script(f"document.getElementById(\"t3_{post_id}\").style.maxWidth=\"60ch\"")
-driver.execute_script(f"document.getElementById(\"t3_{post_id}\").style.padding=\"3ch\"")
+driver.execute_script(f"document.getElementById(\"t3_{post_id}\").style.maxWidth=\"{args.post_content_max_width}ch\"")
+driver.execute_script(f"document.getElementById(\"t3_{post_id}\").style.padding=\"{args.post_content_padding}ch\"")
+if args.use_post:
+    driver.execute_script(f"document.getElementById(\"t3_{post_id}-post-rtjson-content\").style.display=\"none\"")
 element = driver.find_element(By.ID, f"t3_{post_id}")
 element.screenshot("intro.png")
 driver.quit()
 intro = Image(filename = "intro.png")
-intro.resize(1000, int((intro.height/intro.width) * 1000))
+intro.resize(args.post_width, int((intro.height/intro.width) * args.post_width))
 intro.crop(1, 2, intro.width-2, intro.height-2)
 intro.save(filename = "intro.png")
 
@@ -82,9 +96,9 @@ voice1 = AudioFileClip("voice1.aiff")
 voice2 = AudioFileClip("voice2.aiff")
 video = VideoFileClip(args.background)
 srt = list(map(lambda t : ((t[0][0]+voice1.duration, t[0][1]+voice1.duration), textwrap.fill(t[1], width=args.subtitle_wrap_width)), srt))
-generator = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-100, video.h), color="white", method="label")
+generator = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-2*args.subtitle_side_padding, video.h), color=args.subtitle_color, method="label")
 subtitles = SubtitlesClip(srt, generator)
-generator_stroked = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-100, video.h), stroke_color="black", stroke_width=args.subtitle_outline_size, color="white", method="label")
+generator_stroked = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-2*args.subtitle_side_padding, video.h), stroke_color=args.subtitle_outline_color, stroke_width=args.subtitle_outline_size, color=args.subtitle_color, method="label")
 subtitles_stroked = SubtitlesClip(srt, generator_stroked)
 
 # Composite video assets
