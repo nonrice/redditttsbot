@@ -40,7 +40,9 @@ parser.add_argument("--blacklist-words", action="store", default="")
 args = parser.parse_args()
 
 # Check for internet connection (necessary for launchd run-on-wake)
-if not urllib.request.urlopen('https://www.google.com', timeout=5):
+try:
+    urllib.request.urlopen('https://www.google.com', timeout=5)
+except urllib.error.URLError:
     logging.warning("No internet connection detected, continuing execution in 2 minutes")
     time.sleep(120)
 
