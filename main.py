@@ -8,8 +8,7 @@ from whisper.utils import get_writer
 from wand.image import Image
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
-
-#TODO Implement use post flag, use relpaths for background video
+from opplast import Upload
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--subreddit", action="store", default="askreddit")
@@ -33,6 +32,11 @@ parser.add_argument("--subtitle-outline-color", action="store", default="black")
 parser.add_argument("--post-width", action="store", default=1000, type=int)
 parser.add_argument("--post-content-max-width", action="store", default=60, type=int)
 parser.add_argument("--post-content-padding", action="store", default=3, type=int)
+parser.add_argument("--only-video", action="store_true")
+parser.add_argument("--video-tags", action="store", default="")
+parser.add_argument("--title-before", action="store", default="")
+parser.add_argument("--title-after", action="store", default="")
+parser.add_argument("--blacklist-words", action="store", default="")
 args = parser.parse_args()
 
 # Scrape video content (post and comment)
@@ -60,6 +64,7 @@ for post in posts:
                 break
     if found_comment: break
 selected_comment = selected_comment.replace("'", "'\\''")
+original_selected_post = selected_post
 selected_post = selected_post.replace("'", "'\\''")
 
 # Get a good photo of the post
@@ -84,8 +89,8 @@ intro.crop(1, 2, intro.width-2, intro.height-2)
 intro.save(filename = "intro.png")
 
 # Generate TTS and subtitles
-os.system(f"say '{selected_post} [[slnc 300]]' --voice daniel --rate 195 -o voice1.aiff")
-os.system(f"say '{selected_comment} [[slnc 500]]' --voice daniel --rate 195 -o voice2.aiff")
+os.system(f"say '{selected_post} [[slnc 300]]' --rate 195 -o voice1.aiff")
+os.system(f"say '{selected_comment} [[slnc 500]]' --rate 195 -o voice2.aiff")
 model = whisper.load_model("medium")
 result = model.transcribe("voice2.aiff")
 srt = [((segment["start"], segment["end"]), segment["text"]) for segment in result["segments"]]
@@ -111,3 +116,26 @@ else:
     final_video = video.subclip(0 + offset, voice_concat.duration + offset).set_audio(voice_concat)
 output = CompositeVideoClip([final_video, subtitles_stroked.set_pos(("center", "center")), subtitles.set_pos(("center","center")), img.set_duration(voice1.duration).set_pos(("center", "center"))])
 output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec="aac")
+
+# Upload the video
+if not args.only_video:
+    upload = None
+    if args.firefox_profile is not None:
+        upload = Upload(
+            args.firefox_profile,
+            headless = args.headless,
+            timeout = 10
+        )
+    else:
+        upload = Upload(
+            headless = args.headless,
+            timeout = 10
+        )
+    was_uploaded, video_id = upload.upload(
+        os.path.abspath("output.mp4"),
+        title = args.title_before + original_selected_post + args.title_after,
+        tags = args.video_tags.split(),
+        only_upload = False 
+    )
+    print(f"{video_id} has been uploaded to YouTube")
+    upload.close()

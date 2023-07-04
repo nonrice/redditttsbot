@@ -48,3 +48,11 @@
     Set the max width of the post, in CSS `ch` units. Default is `60`.
 * **--post-content-padding** _POST\_CONTENT\_PADDING_  
     Set the padding of the post, in CSS `ch` units. Default is `3`.
+* **--only-video**  
+    Only generate a video, do not upload it to YouTube.
+* **--video-tags** _VIDEO\_TAGS_
+    Space separated list of tags (without the hashtag)
+* **--title_before** _TITLE\_BEFORE_  
+    Text to prepend before the video title
+* **--title_after** _TITLE\_AFTER_
+    Text to append after the video title

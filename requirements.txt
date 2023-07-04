@@ -1,5 +1,6 @@
 requests==2.31.0
-selenium==4.10.0
+opplast==1.0.14
 wand==0.6.11
 openai-whisper==20230314
 moviepy==1.0.3
+urllib3>=1.26.15,<2
