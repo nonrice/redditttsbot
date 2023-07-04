@@ -1,4 +1,4 @@
-import random, argparse, os, textwrap
+import random, argparse, os, textwrap, logging, urllib, time
 import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
@@ -38,6 +38,11 @@ parser.add_argument("--title-before", action="store", default="")
 parser.add_argument("--title-after", action="store", default="")
 parser.add_argument("--blacklist-words", action="store", default="")
 args = parser.parse_args()
+
+# Check for internet connection (necessary for launchd run-on-wake)
+if not urllib.request.urlopen('https://www.google.com', timeout=5):
+    logging.warning("No internet connection detected, continuing execution in 2 minutes")
+    time.sleep(120)
 
 # Scrape video content (post and comment)
 header = { "User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/113.0" }  

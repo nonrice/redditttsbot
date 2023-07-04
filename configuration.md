@@ -52,7 +52,7 @@
     Only generate a video, do not upload it to YouTube.
 * **--video-tags** _VIDEO\_TAGS_
     Space separated list of tags (without the hashtag)
-* **--title_before** _TITLE\_BEFORE_  
+* **--title-before** _TITLE\_BEFORE_  
     Text to prepend before the video title
-* **--title_after** _TITLE\_AFTER_
+* **--title-after** _TITLE\_AFTER_
     Text to append after the video title
