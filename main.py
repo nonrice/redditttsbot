@@ -3,9 +3,9 @@ import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-import whisper
-from whisper.utils import get_writer
 from wand.image import Image
+from aeneas.executetask import ExecuteTask
+from aeneas.task import Task
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
 from opplast import Upload
@@ -26,9 +26,9 @@ parser.add_argument("--subtitle-outline-size", action="store", default=14, type=
 parser.add_argument("--background", action="store", required=True)
 parser.add_argument("--random-cutout", action="store_true")
 parser.add_argument("--headless", action="store_true")
-parser.add_argument("--subtitle-side-padding", action="store", default=50, type=int)
 parser.add_argument("--subtitle-color", action="store", default="white")
 parser.add_argument("--subtitle-outline-color", action="store", default="black")
+parser.add_argument("--subtitle-length", action="store", default=80, type=int)
 parser.add_argument("--post-width", action="store", default=1000, type=int)
 parser.add_argument("--post-content-max-width", action="store", default=60, type=int)
 parser.add_argument("--post-content-padding", action="store", default=3, type=int)
@@ -41,7 +41,7 @@ args = parser.parse_args()
 
 # Check for internet connection (necessary for launchd run-on-wake)
 try:
-    urllib.request.urlopen('https://www.google.com', timeout=5)
+    urllib.request.urlopen('https://sh.reddit.com', timeout=5)
 except urllib.error.URLError:
     logging.warning("No internet connection detected, continuing execution in 2 minutes")
     time.sleep(120)
@@ -70,6 +70,7 @@ for post in posts:
                 found_comment = True
                 break
     if found_comment: break
+original_selected_comment = selected_comment
 selected_comment = selected_comment.replace("'", "'\\''")
 original_selected_post = selected_post
 selected_post = selected_post.replace("'", "'\\''")
@@ -96,11 +97,17 @@ intro.crop(1, 2, intro.width-2, intro.height-2)
 intro.save(filename = "intro.png")
 
 # Generate TTS and subtitles
+original_selected_comment = textwrap.fill(original_selected_comment, width=args.subtitle_length)
+with open("script.txt", "w") as script:
+    script.write(original_selected_comment)
 os.system(f"say '{selected_post} [[slnc 300]]' --rate 195 -o voice1.aiff")
 os.system(f"say '{selected_comment} [[slnc 500]]' --rate 195 -o voice2.aiff")
-model = whisper.load_model("medium")
-result = model.transcribe("voice2.aiff")
-srt = [((segment["start"], segment["end"]), segment["text"]) for segment in result["segments"]]
+config_string = u"task_language=eng|is_text_type=plain|os_task_file_format=json"
+task = Task(config_string=config_string)
+task.audio_file_path_absolute = os.path.abspath("voice2.aiff")
+task.text_file_path_absolute = os.path.abspath("script.txt")
+ExecuteTask(task).execute()
+srt = [((float(frag.begin), float(frag.end)), str(frag.text_fragment)[8:]) for frag in task.sync_map_leaves()[:-1]]
 
 # Load video assets
 img = ImageClip("intro.png")
@@ -108,9 +115,9 @@ voice1 = AudioFileClip("voice1.aiff")
 voice2 = AudioFileClip("voice2.aiff")
 video = VideoFileClip(args.background)
 srt = list(map(lambda t : ((t[0][0]+voice1.duration, t[0][1]+voice1.duration), textwrap.fill(t[1], width=args.subtitle_wrap_width)), srt))
-generator = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-2*args.subtitle_side_padding, video.h), color=args.subtitle_color, method="label")
+generator = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w, video.h), color=args.subtitle_color, method="label")
 subtitles = SubtitlesClip(srt, generator)
-generator_stroked = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w-2*args.subtitle_side_padding, video.h), stroke_color=args.subtitle_outline_color, stroke_width=args.subtitle_outline_size, color=args.subtitle_color, method="label")
+generator_stroked = lambda txt: TextClip(txt, font=args.subtitle_font, fontsize=args.subtitle_font_size, size=(video.w, video.h), stroke_color=args.subtitle_outline_color, stroke_width=args.subtitle_outline_size, color=args.subtitle_color, method="label")
 subtitles_stroked = SubtitlesClip(srt, generator_stroked)
 
 # Composite video assets

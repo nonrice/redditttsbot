@@ -2,4 +2,5 @@
 *.mp4
 *.aiff
 *.png
+*.txt
 geckodriver.log

@@ -36,8 +36,6 @@
     Enabling this flag takes a random portion of the background footage, rather than beginning at the start and truncating anything past the content.
 * **--headless**  
     Enable this to hide browser GUI when taking the post screenshot.
-* **--subtitle-side-padding** _SUBTITLE\_SIDE\_PADDING_  
-    Pixels in side padding for subtitles. Default is `50`.
 * **--subtitle-color** _SUBTITLE\_COLOR_  
     Color for subtitles. Default is `"white"`.
 * **--subtitle-outline-color** _SUBTITLE\_OUTLINE\_COLOR_  
