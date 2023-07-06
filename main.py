@@ -104,7 +104,7 @@ if args.use_post:
     driver.execute_script(
         f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
     )
-driver.execute_script("document.body.style.zoom='400%'")
+driver.execute_script("document.body.style.webkitTransform = scale(4.0)")
 element = driver.find_element(By.ID, f"t3_{post_id}")
 element.screenshot("intro.png")
 driver.quit()
