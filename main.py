@@ -1,4 +1,4 @@
-import random, argparse, os, textwrap, logging, urllib, time
+import random, argparse, os, textwrap, logging, urllib, time, re
 import requests
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
