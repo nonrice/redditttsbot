@@ -28,7 +28,7 @@
     Set the number of top posts from which the final post is chosen. Default is `20`.
 * **--comment-pool-size** _COMMENT\_POOL\_SIZE_  
     Set the number of top comments from which the top comment is chosen. Default is `40`.
-* **--post-time-span** POST_TIME_SPAN  
+* **--post-time-span** _POST\_TIME\_SPAN_
     Set the time span from which the top _POST\_POOL\_SIZE_ posts are chosen. Default is `"week"`.
 * **--firefox-profile** _FIREFOX\_PROFILE_  
     Select a Firefox profile to use instead of the default one.

@@ -80,8 +80,8 @@ for post in posts:
                 break
     if found_comment:
         break
-original_selected_comment = selected_comment
-selected_comment = selected_comment.replace("'", "'\\''")
+original_selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment)
+selected_comment = original_selected_comment.replace("'", "'\\''")
 original_selected_post = selected_post
 selected_post = selected_post.replace("'", "'\\''")
 
@@ -192,7 +192,7 @@ if not args.only_video:
     if args.firefox_profile is not None:
         upload = Upload(args.firefox_profile, headless=args.headless, timeout=10)
     else:
-        upload = Upload(headless=args.headless, timeout=10)
+        raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
         os.path.abspath("output.mp4"),
         title=args.title_before + original_selected_post + args.title_after,
