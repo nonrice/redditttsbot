@@ -81,7 +81,7 @@ for post in posts:
                 break
     if found_comment:
         break
-original_selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment)
+original_selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
 selected_comment = original_selected_comment.replace("'", "'\\''")
 original_selected_post = selected_post
 selected_post = selected_post.replace("'", "'\\''")
