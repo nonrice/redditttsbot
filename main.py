@@ -37,6 +37,7 @@ parser.add_argument("--video-tags", action="store", default="")
 parser.add_argument("--title-before", action="store", default="")
 parser.add_argument("--title-after", action="store", default="")
 parser.add_argument("--blacklist-words", action="store", default="")
+parser.add_argument("--force-creation", action="store_true")
 args = parser.parse_args()
 
 # Scrape video content (post and comment)
@@ -104,7 +105,7 @@ if args.use_post:
     driver.execute_script(
         f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
     )
-driver.execute_script("document.body.style.webkitTransform = 'scale(4.0)'")
+driver.maximize_window()
 element = driver.find_element(By.ID, f"t3_{post_id}")
 element.screenshot("intro.png")
 driver.quit()
@@ -176,6 +177,9 @@ else:
     final_video = video.subclip(0 + offset, voice_concat.duration + offset).set_audio(
         voice_concat
     )
+if final_video.duration > 60 and not args.force_creation:
+    raise Exception("Quitting because video duration detected longer than 60 seconds! Use --force-creation to override this behavior.")
+    
 output = CompositeVideoClip(
     [
         final_video,
