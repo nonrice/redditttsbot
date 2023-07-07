@@ -15,7 +15,7 @@ parser.add_argument("--subreddit", action="store", default="askreddit")
 parser.add_argument("--min-len", action="store", default=600, type=int)
 parser.add_argument("--len-range", action="store", default=300, type=int)
 parser.add_argument("--use-post", action="store_true")
-parser.add_argument("--subtitle-split-length", action="store", default=30, type=int)
+parser.add_argument("--subtitle-wrap-width", action="store", default=30, type=int)
 parser.add_argument("--subtitle-font", action="store", default="Arial")
 parser.add_argument("--subtitle-font-size", action="store", default=60, type=int)
 parser.add_argument("--post-pool-size", action="store", default=20, type=int)
@@ -141,7 +141,7 @@ srt = list(
     map(
         lambda t: (
             (t[0][0] + voice1.duration, t[0][1] + voice1.duration),
-            textwrap.fill(t[1], width=args.subtitle_split_length),
+            textwrap.fill(t[1], width=args.subtitle_wrap_width),
         ),
         srt,
     )

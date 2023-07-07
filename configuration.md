@@ -22,7 +22,7 @@
     Choose the font of the subtitles. Default is `"Arial"`
 * **--subtitle-font-size** _SUBTITLE\_FONT\_SIZE_  
     Choose the font size of the subtitles. Default is `60`.
-* **--subtitle-split-length** _SUBTITLE\_SPLIT\_LENGTH_
+* **--subtitle-length** _SUBTITLE\_SPLIT\_LENGTH_
     Decide the length at which to split to the next subtitle. Default is `80`.
 * **--post-pool-size** _POST\_POOL\_SIZE_  
     Set the number of top posts from which the final post is chosen. Default is `20`.
