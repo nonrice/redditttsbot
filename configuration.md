@@ -22,8 +22,6 @@
     Choose the font of the subtitles. Default is `"Arial"`
 * **--subtitle-font-size** _SUBTITLE\_FONT\_SIZE_  
     Choose the font size of the subtitles. Default is `60`.
-* **--subtitle-length** _SUBTITLE\_SPLIT\_LENGTH_
-    Decide the length at which to split to the next subtitle. Default is `80`.
 * **--post-pool-size** _POST\_POOL\_SIZE_  
     Set the number of top posts from which the final post is chosen. Default is `20`.
 * **--comment-pool-size** _COMMENT\_POOL\_SIZE_  
@@ -56,3 +54,5 @@
     Text to prepend before the video title
 * **--title-after** _TITLE\_AFTER_
     Text to append after the video title
+* **--ttsmaker-token** _TTSMAKER\_TOKEN_  
+    Token to use for online voice synthesis

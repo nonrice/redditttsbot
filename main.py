@@ -4,8 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from wand.image import Image
-from aeneas.executetask import ExecuteTask
-from aeneas.task import Task
+from ttsmaker_query import ttsmaker_query
+from subsai import SubsAI
 from moviepy.editor import *
 from moviepy.video.tools.subtitles import SubtitlesClip
 from opplast import Upload
@@ -28,7 +28,6 @@ parser.add_argument("--random-cutout", action="store_true")
 parser.add_argument("--headless", action="store_true")
 parser.add_argument("--subtitle-color", action="store", default="white")
 parser.add_argument("--subtitle-outline-color", action="store", default="black")
-parser.add_argument("--subtitle-length", action="store", default=80, type=int)
 parser.add_argument("--post-width", action="store", default=1000, type=int)
 parser.add_argument("--post-content-max-width", action="store", default=60, type=int)
 parser.add_argument("--post-content-padding", action="store", default=3, type=int)
@@ -36,9 +35,20 @@ parser.add_argument("--only-video", action="store_true")
 parser.add_argument("--video-tags", action="store", default="")
 parser.add_argument("--title-before", action="store", default="")
 parser.add_argument("--title-after", action="store", default="")
-parser.add_argument("--blacklist-words", action="store", default="")
 parser.add_argument("--force-creation", action="store_true")
+parser.add_argument("--ttsmaker-token", action="store", default="ttsmaker_demo_token")
 args = parser.parse_args()
+
+def tts_preprocess(text):
+    text += " ((⏱️=240))"
+    text = text.replace("...", "((⏱️=240))")
+    text = text.replace(". ", "((⏱️=240))")
+    text = text.replace(".\n", "((⏱️=240))")
+    text = text.replace("? ", "((⏱️=240))")
+    text = text.replace("?\n", "((⏱️=240))")
+    text = text.replace("! ", "((⏱️=240))")
+    text = text.replace("!\n", "((⏱️=240))")
+    return text
 
 # Scrape video content (post and comment)
 header = {
@@ -81,10 +91,7 @@ for post in posts:
                 break
     if found_comment:
         break
-original_selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
-selected_comment = original_selected_comment.replace("'", "'\\''")
-original_selected_post = selected_post
-selected_post = selected_post.replace("'", "'\\''")
+selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
 
 # Get a good photo of the post
 firefox_args = Options()
@@ -94,7 +101,7 @@ if args.firefox_profile is not None:
 if args.headless:
     firefox_args.add_argument("-headless")
 driver = webdriver.Firefox(options=firefox_args)
-driver.get(f"https://sh.reddit.com/r/AskReddit/comments/{post_id}/")
+driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
 driver.execute_script(
     f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
 )
@@ -115,37 +122,39 @@ intro.crop(1, 2, intro.width - 2, intro.height - 2)
 intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
-original_selected_comment = textwrap.fill(
-    original_selected_comment, width=args.subtitle_length
-)
-with open("script.txt", "w") as script:
-    script.write(original_selected_comment)
-os.system(f"say '{selected_post} [[slnc 300]]' --rate 195 -o voice1.aiff")
-os.system(f"say '{selected_comment} [[slnc 500]]' --rate 195 -o voice2.aiff")
-config_string = "task_language=eng|is_text_type=plain|os_task_file_format=json"
-task = Task(config_string=config_string)
-task.audio_file_path_absolute = os.path.abspath("voice2.aiff")
-task.text_file_path_absolute = os.path.abspath("script.txt")
-ExecuteTask(task).execute()
+ttsmaker_query(tts_preprocess(selected_post), "voice1.wav", speed=1.30, token=args.ttsmaker_token)
+ttsmaker_query(tts_preprocess(selected_comment), "voice2.wav", speed=1.30, token=args.ttsmaker_token)
+subs_ai = SubsAI()
+model = subs_ai.create_model('linto-ai/whisper-timestamped', {"segment_type": "word"})
+subs = subs_ai.transcribe("voice2.wav", model)
 srt = [
-    ((float(frag.begin), float(frag.end)), str(frag.text_fragment)[8:])
-    for frag in task.sync_map_leaves()[:-1]
+    [(float(sub.start)/1000, float(sub.end)/1000), sub.text]
+    for sub in subs.events 
 ]
 
 # Load video assets
 img = ImageClip("intro.png")
-voice1 = AudioFileClip("voice1.aiff")
-voice2 = AudioFileClip("voice2.aiff")
+voice1 = AudioFileClip("voice1.wav")
+voice2 = AudioFileClip("voice2.wav")
 video = VideoFileClip(args.background)
+for i in range(1, len(srt)):
+    srt[i-1][0] = (srt[i-1][0][0], srt[i][0][0])
+merged_srt = []
+for i in range(0, len(srt), 3):
+    merged_srt.append([(srt[i][0][0], srt[min(i+2, len(srt)-1)][0][1]), ""])
+    for j in range(i, min(len(srt), i+3)):
+        merged_srt[-1][1] += " " + srt[j][1]
+srt = merged_srt
 srt = list(
     map(
-        lambda t: (
+        lambda t: [
             (t[0][0] + voice1.duration, t[0][1] + voice1.duration),
             textwrap.fill(t[1], width=args.subtitle_wrap_width),
-        ),
+        ],
         srt,
     )
 )
+
 generator = lambda txt: TextClip(
     txt,
     font=args.subtitle_font,
@@ -185,7 +194,7 @@ output = CompositeVideoClip(
         final_video,
         subtitles_stroked.set_pos(("center", "center")),
         subtitles.set_pos(("center", "center")),
-        img.set_duration(voice1.duration).set_pos(("center", "center")),
+        img.set_duration(voice1.duration).fx(transfx.slide_in, duration=0.4, side="bottom").set_pos(("center", "center")),
     ]
 )
 output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec="aac")
