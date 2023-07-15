@@ -1,6 +1,6 @@
 requests==2.31.0
 opplast==1.0.14
 wand==0.6.11
-aeneas==1.7.0.0
+subsai @ git+https://github.com/abdeladim-s/subsai@4cfbda07aad112057304e145d1f11023f3a892c2
 moviepy==1.0.3
 urllib3>=1.26.15,<2
