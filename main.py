@@ -111,7 +111,7 @@ try:
     )
     if args.use_post:
         driver.execute_script(
-            f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
+            "document.evaluate('/html/body/div[1]/div/div[2]/div[2]/div/div/div/div[2]/div[3]/div[1]/div[3]/div[1]/div/div[5]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.style.display='none';"
         )
     time.sleep(5)
     element = driver.find_element(By.ID, f"t3_{post_id}")
