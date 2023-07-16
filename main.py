@@ -117,8 +117,8 @@ try:
     element.screenshot("intro.png")
     driver.quit()
 except:
-    raise Exception("Selenium error! Quitting.")
     driver.quit()
+    raise Exception("Selenium error! Quitting.")
 intro = Image(filename="intro.png")
 intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
 intro.crop(1, 2, intro.width - 2, intro.height - 2)
