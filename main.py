@@ -100,6 +100,7 @@ if args.firefox_profile is not None:
     firefox_args.add_argument(args.firefox_profile)
 if args.headless:
     firefox_args.add_argument("-headless")
+firefox_args.add_argument("-start-maximized")
 driver = webdriver.Firefox(options=firefox_args)
 driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
 time.sleep(5)
@@ -110,7 +111,6 @@ if args.use_post:
     driver.execute_script(
         f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
     )
-driver.maximize_window()
 time.sleep(5)
 element = driver.find_element(By.ID, f"t3_{post_id}")
 element.screenshot("intro.png")
