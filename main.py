@@ -44,8 +44,6 @@ def tts_preprocess(text):
     text = text.replace("...", "((⏱️=240))")
     text = text.replace(". ", "((⏱️=240))")
     text = text.replace(".\n", "((⏱️=240))")
-    text = text.replace("? ", "((⏱️=240))")
-    text = text.replace("?\n", "((⏱️=240))")
     text = text.replace("! ", "((⏱️=240))")
     text = text.replace("!\n", "((⏱️=240))")
     return text
