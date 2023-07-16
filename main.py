@@ -103,7 +103,7 @@ try:
         firefox_args.add_argument("-headless")
     firefox_args.add_argument("-start-maximized")
     driver = webdriver.Firefox(options=firefox_args)
-    driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
+    driver.get(f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}/")
     time.sleep(5)
     driver.execute_script(
         f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
