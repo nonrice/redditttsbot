@@ -116,13 +116,13 @@ try:
     element = driver.find_element(By.ID, f"t3_{post_id}")
     element.screenshot("intro.png")
     driver.quit()
-    intro = Image(filename="intro.png")
-    intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
-    intro.crop(1, 2, intro.width - 2, intro.height - 2)
-    intro.save(filename="intro.png")
 except:
     raise Exception("Selenium error! Quitting.")
     driver.quit()
+intro = Image(filename="intro.png")
+intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
+intro.crop(1, 2, intro.width - 2, intro.height - 2)
+intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
 ttsmaker_query(tts_preprocess(selected_post), "voice1.wav", speed=1.25, token=args.ttsmaker_token)
