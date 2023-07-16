@@ -94,6 +94,7 @@ for post in posts:
 selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
 
 # Get a good photo of the post
+driver = None
 try:
     firefox_args = Options()
     if args.firefox_profile is not None:
