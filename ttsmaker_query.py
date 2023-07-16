@@ -30,6 +30,6 @@ if __name__ == "__main__":
     parser.add_argument("--output-file", required=True)
     args = parser.parse_args()
 
-    ttsmaker_query(args.text, args.output_file, args.token, args.voice_id, args.audio_format, args.audio_speed, args.audio)
+    ttsmaker_query(args.text, args.output_file, args.token, args.voice_id, args.format, args.speed, args.volume, args.paragraph_pause)
 
 
