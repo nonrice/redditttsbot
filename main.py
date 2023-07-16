@@ -105,9 +105,6 @@ driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
 driver.execute_script(
     f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
 )
-driver.execute_script(
-    f'document.getElementById("t3_{post_id}").style.padding="{args.post_content_padding}ch"'
-)
 if args.use_post:
     driver.execute_script(
         f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
@@ -208,9 +205,10 @@ if not args.only_video:
         raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
         os.path.abspath("output.mp4"),
-        title=args.title_before + original_selected_post + args.title_after,
+        title=args.title_before + selected_post + args.title_after,
         tags=args.video_tags.split(),
         only_upload=False,
     )
     print(f"{video_id} has been uploaded to YouTube")
     upload.close()
+
