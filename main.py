@@ -78,7 +78,7 @@ for post in posts:
             f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top",
             headers=header,
         ).json()
-        random.shuffle(comments)
+        random.shuffle(comments[1]["data"]["children"])
         for comment in comments[1]["data"]["children"][1:-1]:
             if (
                 args.min_len
