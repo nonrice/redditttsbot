@@ -44,8 +44,6 @@
     Set the width in pixels for the post image. Default is `1000`.
 * **--post-content-max-width** _POST\_CONTENT\_MAX\_WIDTH_  
     Set the max width of the post, in CSS `ch` units. Default is `60`.
-* **--post-content-padding** _POST\_CONTENT\_PADDING_  
-    Set the padding of the post, in CSS `ch` units. Default is `3`.
 * **--only-video**  
     Only generate a video, do not upload it to YouTube.
 * **--video-tags** _VIDEO\_TAGS_
