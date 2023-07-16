@@ -94,31 +94,35 @@ for post in posts:
 selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
 
 # Get a good photo of the post
-firefox_args = Options()
-if args.firefox_profile is not None:
-    firefox_args.add_argument("-profile")
-    firefox_args.add_argument(args.firefox_profile)
-if args.headless:
-    firefox_args.add_argument("-headless")
-firefox_args.add_argument("-start-maximized")
-driver = webdriver.Firefox(options=firefox_args)
-driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
-time.sleep(5)
-driver.execute_script(
-    f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
-)
-if args.use_post:
+try:
+    firefox_args = Options()
+    if args.firefox_profile is not None:
+        firefox_args.add_argument("-profile")
+        firefox_args.add_argument(args.firefox_profile)
+    if args.headless:
+        firefox_args.add_argument("-headless")
+    firefox_args.add_argument("-start-maximized")
+    driver = webdriver.Firefox(options=firefox_args)
+    driver.get(f"https://www.reddit.com/r/AskReddit/comments/{post_id}/")
+    time.sleep(5)
     driver.execute_script(
-        f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
+        f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
     )
-time.sleep(5)
-element = driver.find_element(By.ID, f"t3_{post_id}")
-element.screenshot("intro.png")
-driver.quit()
-intro = Image(filename="intro.png")
-intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
-intro.crop(1, 2, intro.width - 2, intro.height - 2)
-intro.save(filename="intro.png")
+    if args.use_post:
+        driver.execute_script(
+            f'document.getElementById("t3_{post_id}-post-rtjson-content").style.display="none"'
+        )
+    time.sleep(5)
+    element = driver.find_element(By.ID, f"t3_{post_id}")
+    element.screenshot("intro.png")
+    driver.quit()
+    intro = Image(filename="intro.png")
+    intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
+    intro.crop(1, 2, intro.width - 2, intro.height - 2)
+    intro.save(filename="intro.png")
+except:
+    raise Exception("Selenium error! Quitting.")
+    driver.quit()
 
 # Generate TTS and subtitles
 ttsmaker_query(tts_preprocess(selected_post), "voice1.wav", speed=1.25, token=args.ttsmaker_token)
