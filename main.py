@@ -37,6 +37,11 @@ parser.add_argument("--title-before", action="store", default="")
 parser.add_argument("--title-after", action="store", default="")
 parser.add_argument("--force-creation", action="store_true")
 parser.add_argument("--ttsmaker-token", action="store", default="ttsmaker_demo_token")
+parser.add_argument("--custom-video", action="store_true")
+parser.add_argument("--custom-video-selected-post", action="store")
+parser.add_argument("--custom-video-selected-post-id", action="store")
+parser.add_argument("--custom-video-selected-comment-file", action="store")
+
 args = parser.parse_args()
 
 def tts_preprocess(text):
@@ -49,47 +54,57 @@ def tts_preprocess(text):
     return text
 
 # Scrape video content (post and comment)
-header = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/113.0"
-}
-posts = requests.get(
-    f"https://www.reddit.com/r/{args.subreddit}/top/.json?count={args.post_pool_size}&t={args.post_time_span}",
-    headers=header,
-).json()["data"]["children"]
-random.shuffle(posts)
 selected_comment = ""
 selected_post = ""
-for post in posts:
-    post_id = post["data"]["id"]
-    found_comment = False
-    if args.use_post:
-        if (
-            args.min_len
-            <= len(post["data"]["selftext"])
-            <= args.min_len + args.len_range
-        ):
-            selected_comment = post["data"]["selftext"]
-            selected_post = post["data"]["title"]
-            found_comment = True
-    else:
-        comments = requests.get(
-            f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top",
-            headers=header,
-        ).json()
-        comments[1]["data"]["children"] = random.sample(comments[1]["data"]["children"][1:-1], len(comments[1]["data"]["children"][1:-1]))
-        for comment in comments[1]["data"]["children"]:
+post_id = ""
+if not args.custom_video:
+    header = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:109.0) Gecko/20100101 Firefox/113.0"
+    }
+    posts = requests.get(
+        f"https://www.reddit.com/r/{args.subreddit}/top/.json?count={args.post_pool_size}&t={args.post_time_span}",
+        headers=header,
+    ).json()["data"]["children"]
+    random.shuffle(posts)
+    for post in posts:
+        post_id = post["data"]["id"]
+        found_comment = False
+        if args.use_post:
             if (
                 args.min_len
-                <= len(comment["data"]["body"])
+                <= len(post["data"]["selftext"])
                 <= args.min_len + args.len_range
             ):
-                selected_comment = comment["data"]["body"]
+                selected_comment = post["data"]["selftext"]
                 selected_post = post["data"]["title"]
                 found_comment = True
-                break
-    if found_comment:
-        break
-selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
+        else:
+            comments = requests.get(
+                f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top",
+                headers=header,
+            ).json()
+            comments[1]["data"]["children"] = random.sample(comments[1]["data"]["children"][1:-1], len(comments[1]["data"]["children"][1:-1]))
+            for comment in comments[1]["data"]["children"]:
+                if (
+                    args.min_len
+                    <= len(comment["data"]["body"])
+                    <= args.min_len + args.len_range
+                ):
+                    selected_comment = comment["data"]["body"]
+                    selected_post = post["data"]["title"]
+                    found_comment = True
+                    break
+        if found_comment:
+            break
+    selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
+else:
+    selected_post = args.custom_video_selected_post
+    post_id = args.custom_video_selected_post_id
+    with open(os.path.abspath(args.custom_video_selected_comment_file), "r") as content:
+        selected_comment = content.read()
+
+if selected_comment == "":
+    raise Exception("Couldn't find a suitable comment! Quitting.")
 
 # Get a good photo of the post
 driver = None
