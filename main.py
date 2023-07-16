@@ -211,3 +211,4 @@ if not args.only_video:
     )
     print(f"{video_id} has been uploaded to YouTube")
     upload.close()
+
