@@ -7,8 +7,8 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
             if len(text_frag):
                 frag = str(uuid.uuid4()) + "." + audio_format
                 ttsmaker_query(text_frag, frag, token, voice_id, audio_format, speed, volume, paragraph_pause)
-                concat_command += frag
-        concat_command += " " + output_file
+                concat_command += frag + " "
+        concat_command += output_file
         os.system(concat_command)
         return output_file
     
