@@ -2,7 +2,7 @@ import requests, json, argparse, os, uuid, time
 
 def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="wav", speed=1.05, volume=0, paragraph_pause=0):
     if "\n" in text:
-        conat_command = "sox "
+        concat_command = "sox "
         for text_frag in text.split("\n"):
             if len(text_frag):
                 frag = str(uuid.uuid4()) + "." + audio_format
