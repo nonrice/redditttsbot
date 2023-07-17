@@ -45,7 +45,7 @@ parser.add_argument("--custom-video-selected-comment-file", action="store")
 args = parser.parse_args()
 
 def tts_preprocess(text):
-    text += " ((⏱️=240))"
+    text = " ((⏱️=150))" + text + " ((⏱️=240))"
     text = text.replace("...", "((⏱️=240))")
     text = text.replace(". ", "((⏱️=240))")
     text = text.replace(".\n", "((⏱️=240))")
@@ -211,7 +211,7 @@ output = CompositeVideoClip(
         final_video,
         subtitles_stroked.set_pos(("center", "center")),
         subtitles.set_pos(("center", "center")),
-        img.set_duration(voice1.duration).fx(transfx.slide_in, duration=0.4, side="bottom").set_pos(("center", "center")),
+        img.set_duration(voice1.duration).resize(lambda t: min(1, 200 * (t-0.1) * (t-0.1) * (t-0.1) + 1)).set_pos(("center", "center")),
     ]
 )
 output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec="aac")
