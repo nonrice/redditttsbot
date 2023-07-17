@@ -39,7 +39,7 @@ parser.add_argument("--force-creation", action="store_true")
 parser.add_argument("--ttsmaker-token", action="store", default="ttsmaker_demo_token")
 parser.add_argument("--custom-video", action="store_true")
 parser.add_argument("--custom-video-selected-post", action="store")
-parser.add_argument("--custom-video-selected-post-id", action="store")
+arser.add_argument("--custom-video-selected-post-id", action="store")
 parser.add_argument("--custom-video-selected-comment-file", action="store")
 
 args = parser.parse_args()
