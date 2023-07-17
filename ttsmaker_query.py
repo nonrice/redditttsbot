@@ -2,7 +2,14 @@ import requests, json, argparse, os, uuid, time
 
 def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="wav", speed=1.05, volume=0, paragraph_pause=0):
     if "\n" in text:
-        os.system("sox " + " ".join([ttsmaker_query(text_frag, str(uuid.uuid4())+"."+audio_format, token, voice_id, audio_format, speed, volume, paragraph_pause) for text_frag in text.split("\n")]) + " " + output_file)
+        conat_command = "sox "
+        for text_frag in text.split("\n"):
+            if len(text_frag):
+                frag = str(uuid.uuid4()) + "." + audio_format
+                ttsmaker_query(text_frag, frag, token, voice_id, audio_format, speed, volume, paragraph_pause)
+                concat_command += frag
+        concat_command += " " + output_file
+
         return output_file
 
     url = 'https://api.ttsmaker.com/v1/create-tts-order'
