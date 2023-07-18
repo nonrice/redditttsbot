@@ -108,8 +108,8 @@ if selected_comment == "":
 
 # Get a good photo of the post
 driver = None
+firefox_args = Options()
 try:
-    firefox_args = Options()
     if args.firefox_profile is not None:
         firefox_args.add_argument("-profile")
         firefox_args.add_argument(args.firefox_profile)
@@ -220,7 +220,7 @@ output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec
 if not args.only_video:
     upload = None
     if args.firefox_profile is not None:
-        upload = Upload(args.firefox_profile, headless=args.headless, timeout=10)
+        upload = Upload(args.firefox_profile, headless=args.headless, timeout=10, options=firefox_args)
     else:
         raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
