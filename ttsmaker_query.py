@@ -11,8 +11,7 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
         concat_command += output_file
         os.system(concat_command)
         return output_file
-    
-    print(text + "BBBBB")
+
     url = 'https://api.ttsmaker.com/v1/create-tts-order'
     headers = {'Content-Type': 'application/json; charset=utf-8'}
     params = {
@@ -46,5 +45,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     ttsmaker_query(args.text, args.output_file, args.token, args.voice_id, args.format, args.speed, args.volume, args.paragraph_pause)
+
 
 
