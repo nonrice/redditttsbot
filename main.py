@@ -219,8 +219,10 @@ output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec
 # Upload the video
 if not args.only_video:
     upload = None
+    firefox_args_2 = Options()
+    firefox_args_2.add_argument("-start-maximized")
     if args.firefox_profile is not None:
-        upload = Upload(headless=args.headless, timeout=10, options=firefox_args)
+        upload = Upload(args.firefox_profile, headless=args.headless, timeout=10, options=firefox_args_2)
     else:
         raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
