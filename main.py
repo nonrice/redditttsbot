@@ -220,7 +220,10 @@ output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec
 if not args.only_video:
     upload = None
     firefox_args_2 = Options()
-    firefox_args_2.add_argument("-width 1920 -height 1080")
+    firefox_args_2.add_argument("-width")
+    firefox_args_2.add_argument("1920")
+    firefox_args_2.add_argument("-height")
+    firefox_args_2.add_argument("1080")
     if args.headless:
         firefox_args_2.add_argument("--headless")
     if args.firefox_profile is not None:
