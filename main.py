@@ -227,7 +227,7 @@ if not args.only_video:
         raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
         os.path.abspath("output.mp4"),
-        title=args.title_before + selected_post + args.title_after,
+        title=args.title_before + selected_post[:min(len(selected_post), 100-len(args.title_after)-len(args.title_before))] + args.title_after,
         tags=args.video_tags.split(),
         only_upload=False,
     )
