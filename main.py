@@ -44,6 +44,7 @@ parser.add_argument("--custom-video-selected-comment-file", action="store")
 
 args = parser.parse_args()
 
+
 def tts_preprocess(text):
     text = " ((⏱️=150))" + text + " ((⏱️=240))"
     text = text.replace("...", "((⏱️=240))")
@@ -52,6 +53,7 @@ def tts_preprocess(text):
     text = text.replace("! ", "((⏱️=240))")
     text = text.replace("!\n", "((⏱️=240))")
     return text
+
 
 # Scrape video content (post and comment)
 selected_comment = ""
@@ -83,7 +85,10 @@ if not args.custom_video:
                 f"https://www.reddit.com/r/{args.subreddit}/comments/{post_id}.json?depth=1&limit={args.comment_pool_size}&sort=top",
                 headers=header,
             ).json()
-            comments[1]["data"]["children"] = random.sample(comments[1]["data"]["children"][1:-1], len(comments[1]["data"]["children"][1:-1]))
+            comments[1]["data"]["children"] = random.sample(
+                comments[1]["data"]["children"][1:-1],
+                len(comments[1]["data"]["children"][1:-1]),
+            )
             for comment in comments[1]["data"]["children"]:
                 if (
                     args.min_len
@@ -96,7 +101,9 @@ if not args.custom_video:
                     break
         if found_comment:
             break
-    selected_comment = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'\1', selected_comment).replace("&amp;", "&")
+    selected_comment = re.sub(
+        r"\[([^\]]+)\]\(([^)]+)\)", r"\1", selected_comment
+    ).replace("&amp;", "&")
 else:
     selected_post = args.custom_video_selected_post
     post_id = args.custom_video_selected_post_id
@@ -124,7 +131,7 @@ try:
     )
     if args.use_post:
         driver.execute_script(
-            "for (const ele of document.getElementsByTagName(\"p\")){\nele.style.display=\"none\";\n}"
+            'for (const ele of document.getElementsByTagName("p")){\nele.style.display="none";\n}'
         )
     time.sleep(5)
     element = driver.find_element(By.ID, f"t3_{post_id}")
@@ -139,14 +146,20 @@ intro.crop(1, 2, intro.width - 2, intro.height - 2)
 intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
-ttsmaker_query(tts_preprocess(selected_post), "voice1.wav", speed=1.20, token=args.ttsmaker_token)
-ttsmaker_query(tts_preprocess(selected_comment), "voice2.wav", speed=1.20, token=args.ttsmaker_token)
+ttsmaker_query(
+    tts_preprocess(selected_post), "voice1.wav", speed=1.20, token=args.ttsmaker_token
+)
+ttsmaker_query(
+    tts_preprocess(selected_comment),
+    "voice2.wav",
+    speed=1.20,
+    token=args.ttsmaker_token,
+)
 subs_ai = SubsAI()
-model = subs_ai.create_model('linto-ai/whisper-timestamped', {"segment_type": "word"})
+model = subs_ai.create_model("linto-ai/whisper-timestamped", {"segment_type": "word"})
 subs = subs_ai.transcribe("voice2.wav", model)
 srt = [
-    [(float(sub.start)/1000, float(sub.end)/1000), sub.text]
-    for sub in subs.events 
+    [(float(sub.start) / 1000, float(sub.end) / 1000), sub.text] for sub in subs.events
 ]
 
 # Load video assets
@@ -155,11 +168,11 @@ voice1 = AudioFileClip("voice1.wav")
 voice2 = AudioFileClip("voice2.wav")
 video = VideoFileClip(args.background)
 for i in range(1, len(srt)):
-    srt[i-1][0] = (srt[i-1][0][0], srt[i][0][0])
+    srt[i - 1][0] = (srt[i - 1][0][0], srt[i][0][0])
 merged_srt = []
 for i in range(0, len(srt), 3):
-    merged_srt.append([(srt[i][0][0], srt[min(i+2, len(srt)-1)][0][1]), ""])
-    for j in range(i, min(len(srt), i+3)):
+    merged_srt.append([(srt[i][0][0], srt[min(i + 2, len(srt) - 1)][0][1]), ""])
+    for j in range(i, min(len(srt), i + 3)):
         merged_srt[-1][1] += " " + srt[j][1]
 srt = merged_srt
 srt = list(
@@ -172,26 +185,39 @@ srt = list(
     )
 )
 
-generator = lambda txt: TextClip(
-    txt,
-    font=args.subtitle_font,
-    fontsize=args.subtitle_font_size,
-    size=(video.w, video.h),
-    color=args.subtitle_color,
-    method="label",
-)
-subtitles = SubtitlesClip(srt, generator)
-generator_stroked = lambda txt: TextClip(
-    txt,
-    font=args.subtitle_font,
-    fontsize=args.subtitle_font_size,
-    size=(video.w, video.h),
-    stroke_color=args.subtitle_outline_color,
-    stroke_width=args.subtitle_outline_size,
-    color=args.subtitle_color,
-    method="label",
-)
-subtitles_stroked = SubtitlesClip(srt, generator_stroked)
+subtitles = [
+    TextClip(
+        sub[1],
+        font=args.subtitle_font,
+        fontsize=args.subtitle_font_size,
+        size=(video.w, video.h),
+        color=args.subtitle_color,
+        method="label",
+    )
+    .set_pos(("center", "center"))
+    .set_start(sub[0][0])
+    .set_end(sub[0][1])
+    .resize(lambda t: max(0.5, min(1, 200 * (t - 0.075)**3 + 1)))
+    for sub in srt
+]
+
+subtitles_stroked = [
+    TextClip(
+        sub[1],
+        font=args.subtitle_font,
+        fontsize=args.subtitle_font_size,
+        size=(video.w, video.h),
+        stroke_color=args.subtitle_outline_color,
+        stroke_width=args.subtitle_outline_size,
+        color=args.subtitle_color,
+        method="label",
+    )
+    .set_pos(("center", "center"))
+    .set_start(sub[0][0])
+    .set_end(sub[0][1])
+    .resize(lambda t: max(0.5, min(1, 200 * (t - 0.075)**3 + 1)))
+    for sub in srt
+]
 
 # Composite video assets
 voice_concat = concatenate_audioclips([voice1, voice2])
@@ -204,15 +230,19 @@ else:
         voice_concat
     )
 if final_video.duration > 60 and not args.force_creation:
-    raise Exception("Quitting because video duration detected longer than 60 seconds! Use --force-creation to override this behavior.")
-    
+    raise Exception(
+        "Quitting because video duration detected longer than 60 seconds! Use --force-creation to override this behavior."
+    )
+
 output = CompositeVideoClip(
     [
         final_video,
-        subtitles_stroked.set_pos(("center", "center")),
-        subtitles.set_pos(("center", "center")),
-        img.set_duration(voice1.duration).resize(lambda t: min(1, 200 * (t-0.1) * (t-0.1) * (t-0.1) + 1)).set_pos(("center", "center")),
+        img.set_duration(voice1.duration)
+        .resize(lambda t: min(1, 200 * (t - 0.1)**3  + 1))
+        .set_pos(("center", "center")),
     ]
+    + subtitles_stroked
+    + subtitles
 )
 output.write_videofile("output.mp4", fps=video.fps, codec="libx264", audio_codec="aac")
 
@@ -227,16 +257,25 @@ if not args.only_video:
     if args.headless:
         firefox_args_2.add_argument("--headless")
     if args.firefox_profile is not None:
-        upload = Upload(args.firefox_profile, headless=args.headless, timeout=10, options=firefox_args_2)
+        upload = Upload(
+            args.firefox_profile,
+            headless=args.headless,
+            timeout=10,
+            options=firefox_args_2,
+        )
     else:
         raise ValueError("Firefox profile is required for uploading!")
     was_uploaded, video_id = upload.upload(
         os.path.abspath("output.mp4"),
-        title=args.title_before + selected_post[:min(len(selected_post), 100-len(args.title_after)-len(args.title_before))] + args.title_after,
+        title=args.title_before
+        + selected_post[
+            : min(
+                len(selected_post), 100 - len(args.title_after) - len(args.title_before)
+            )
+        ]
+        + args.title_after,
         tags=args.video_tags.split(),
         only_upload=False,
     )
     print(f"{video_id} has been uploaded to YouTube")
     upload.close()
-
-
