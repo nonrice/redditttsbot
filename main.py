@@ -116,6 +116,10 @@ if selected_comment == "":
 # Get a good photo of the post
 driver = None
 firefox_args = Options()
+firefox_args_2.add_argument("-width")
+firefox_args_2.add_argument("1920")
+firefox_args_2.add_argument("-height")
+firefox_args_2.add_argument("1080")
 try:
     if args.firefox_profile is not None:
         firefox_args.add_argument("-profile")
