@@ -1,6 +1,6 @@
 import requests, json, argparse, os, uuid, time
 
-def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="mp3", speed=1.05, volume=0, paragraph_pause=0):
+def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="mp3", speed=1.00, volume=0, paragraph_pause=0):
     if "\n" in text:
         concat_command = "sox "
         for text_frag in text.split("\n"):
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     parser.add_argument("--token", default="ttsmaker_demo_token")
     parser.add_argument("--voice-id", type=int, default=147)
     parser.add_argument("--format", default="mp3")
-    parser.add_argument("--speed", type=float, default=1.05)
+    parser.add_argument("--speed", type=float, default=1.00)
     parser.add_argument("--volume", type=float, default=0)
     parser.add_argument("--paragraph-pause", type=int, default=0)
     parser.add_argument("--output-file", required=True)
