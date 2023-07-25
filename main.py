@@ -151,27 +151,27 @@ intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
 ttsmaker_query(
-    tts_preprocess(selected_post), "voice1.wav", speed=1.20, token=args.ttsmaker_token, volume=3, voice_id=2599
+    tts_preprocess(selected_post), "voice1.mp3", speed=1.20, token=args.ttsmaker_token, volume=3, voice_id=147
 )
 ttsmaker_query(
     tts_preprocess(selected_comment),
-    "voice2.wav",
+    "voice2.mp3",
     speed=1.20,
     token=args.ttsmaker_token,
     volume=3,
-    voice_id=2599
+    voice_id=147
 )
 subs_ai = SubsAI()
 model = subs_ai.create_model("linto-ai/whisper-timestamped", {"segment_type": "word"})
-subs = subs_ai.transcribe("voice2.wav", model)
+subs = subs_ai.transcribe("voice2.mp3", model)
 srt = [
     [(float(sub.start) / 1000, float(sub.end) / 1000), sub.text] for sub in subs.events
 ]
 
 # Load video assets
 img = ImageClip("intro.png")
-voice1 = AudioFileClip("voice1.wav")
-voice2 = AudioFileClip("voice2.wav")
+voice1 = AudioFileClip("voice1.mp3")
+voice2 = AudioFileClip("voice2.mp3")
 video = VideoFileClip(args.background)
 for i in range(1, len(srt)):
     srt[i - 1][0] = (srt[i - 1][0][0], srt[i][0][0])
