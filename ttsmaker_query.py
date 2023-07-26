@@ -8,7 +8,8 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
                 frag = str(uuid.uuid4()) + "." + audio_format
                 ttsmaker_query(text_frag, frag, token, voice_id, audio_format, speed, volume, paragraph_pause)
                 concat_command += frag + " "
-        concat_command += output_file
+        concat_command += "-C 0 " + output_file 
+        print(concat_command)
         os.system(concat_command)
         return output_file
 
@@ -30,6 +31,8 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
         content = requests.get(response["audio_file_url"], stream=True).content
         out.write(content)
     
+    os.system("sox " + output_file + " -C 0 TMP" + output_file + " silence -l 1 0.1 1% -1 0.30 1%")
+    os.system("mv TMP" + output_file + " " + output_file)
     return output_file
 
 if __name__ == "__main__":

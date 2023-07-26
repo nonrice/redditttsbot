@@ -44,17 +44,6 @@ parser.add_argument("--custom-video-selected-comment-file", action="store")
 
 args = parser.parse_args()
 
-
-def tts_preprocess(text):
-    text = " ((⏱️=150))" + text + " ((⏱️=240))"
-    text = text.replace("...", "((⏱️=240))")
-    text = text.replace(". ", "((⏱️=240))")
-    text = text.replace(".\n", "((⏱️=240))")
-    text = text.replace("! ", "((⏱️=240))")
-    text = text.replace("!\n", "((⏱️=240))")
-    return text
-
-
 # Scrape video content (post and comment)
 selected_comment = ""
 selected_post = ""
@@ -151,10 +140,10 @@ intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
 ttsmaker_query(
-    tts_preprocess(selected_post), "voice1.mp3", token=args.ttsmaker_token, voice_id=147
+    selected_post, "voice1.mp3", token=args.ttsmaker_token, voice_id=147
 )
 ttsmaker_query(
-    tts_preprocess(selected_comment),
+    selected_comment,
     "voice2.mp3",
     token=args.ttsmaker_token,
     voice_id=147
@@ -168,8 +157,8 @@ srt = [
 
 # Load video assets
 img = ImageClip("intro.png")
-voice1 = AudioFileClip("voice1.mp3").fl_time(lambda: 1.2*t, apply_to=['mask', 'audio'])
-voice2 = AudioFileClip("voice2.mp3").fl_time(lambda: 1.2*t, apply_to=['mask', 'audio'])
+voice1 = AudioFileClip("voice1.mp3")
+voice2 = AudioFileClip("voice2.mp3")
 video = VideoFileClip(args.background)
 for i in range(1, len(srt)):
     srt[i - 1][0] = (srt[i - 1][0][0], srt[i][0][0])

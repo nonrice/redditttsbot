@@ -7,3 +7,4 @@ geckodriver.log
 __pycache__
 *.webm
 *.wav
+*.mp3
