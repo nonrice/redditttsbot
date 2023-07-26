@@ -30,7 +30,7 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
         content = requests.get(response["audio_file_url"], stream=True).content
         out.write(content)
     
-    os.system("sox " + " -v " + str(volume) + " " + output_file + " -C 0 TMP" + output_file + " silence -l 1 0.1 1% -1 0.35 1% tempo " + str(speed))
+    os.system("sox " + " -v " + str(volume) + " " + output_file + " -C 0 TMP" + output_file + " silence -l 1 0.1 1% -1 0.40 1% tempo " + str(speed))
     os.system("mv TMP" + output_file + " " + output_file)
     return output_file
 
