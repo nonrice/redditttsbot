@@ -123,7 +123,7 @@ try:
         f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
     )
     driver.execute_script(
-        f'document.getElementById("t3_{post_id}").parentElement.style.padding="{args.post_content_padding}ch"'
+        f'document.getElementById("t3_{post_id}").parentElement.style.padding="3ch"'
     )
     driver.execute_script(
         f'document.getElementById("t3_{post_id}").style.padding="{args.post_content_padding}ch"'
