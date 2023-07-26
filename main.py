@@ -151,14 +151,12 @@ intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
 ttsmaker_query(
-    tts_preprocess(selected_post), "voice1.mp3", speed=1.20, token=args.ttsmaker_token, volume=3, voice_id=147
+    tts_preprocess(selected_post), "voice1.mp3", token=args.ttsmaker_token, voice_id=147
 )
 ttsmaker_query(
     tts_preprocess(selected_comment),
     "voice2.mp3",
-    speed=1.20,
     token=args.ttsmaker_token,
-    volume=3,
     voice_id=147
 )
 subs_ai = SubsAI()
@@ -170,8 +168,8 @@ srt = [
 
 # Load video assets
 img = ImageClip("intro.png")
-voice1 = AudioFileClip("voice1.mp3")
-voice2 = AudioFileClip("voice2.mp3")
+voice1 = AudioFileClip("voice1.mp3").fl_time(lambda: 1.2*t, apply_to=['mask', 'audio'])
+voice2 = AudioFileClip("voice2.mp3").fl_time(lambda: 1.2*t, apply_to=['mask', 'audio'])
 video = VideoFileClip(args.background)
 for i in range(1, len(srt)):
     srt[i - 1][0] = (srt[i - 1][0][0], srt[i][0][0])
