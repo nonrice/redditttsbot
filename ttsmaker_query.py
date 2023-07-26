@@ -1,6 +1,6 @@
 import requests, json, argparse, os, uuid, time
 
-def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="mp3", speed=1.00, volume=0, paragraph_pause=0):
+def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147, audio_format="mp3", speed=1.00, volume=1, paragraph_pause=0):
     if "\n" in text:
         concat_command = "sox "
         for text_frag in text.split("\n"):
@@ -9,7 +9,6 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
                 ttsmaker_query(text_frag, frag, token, voice_id, audio_format, speed, volume, paragraph_pause)
                 concat_command += frag + " "
         concat_command += "-C 0 " + output_file 
-        print(concat_command)
         os.system(concat_command)
         return output_file
 
@@ -20,7 +19,7 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
         'text': text,
         'voice_id': voice_id,
         'audio_format': audio_format,
-        'audio_speed': speed,
+        'audio_speed': 1.0,
         'audio_volume': volume,
         'text_paragraph_pause_time': paragraph_pause
     }
@@ -31,7 +30,7 @@ def ttsmaker_query(text, output_file, token="ttsmaker_demo_token", voice_id=147,
         content = requests.get(response["audio_file_url"], stream=True).content
         out.write(content)
     
-    os.system("sox " + output_file + " -C 0 TMP" + output_file + " silence -l 1 0.1 1% -1 0.30 1%")
+    os.system("sox " + " -v " + str(volume) + " " + output_file + " -C 0 TMP" + output_file + " silence -l 1 0.1 1% -1 0.35 1% tempo " + str(speed))
     os.system("mv TMP" + output_file + " " + output_file)
     return output_file
 
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     parser.add_argument("--voice-id", type=int, default=147)
     parser.add_argument("--format", default="mp3")
     parser.add_argument("--speed", type=float, default=1.00)
-    parser.add_argument("--volume", type=float, default=0)
+    parser.add_argument("--volume", type=float, default=1)
     parser.add_argument("--paragraph-pause", type=int, default=0)
     parser.add_argument("--output-file", required=True)
     args = parser.parse_args()

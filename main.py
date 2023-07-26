@@ -140,13 +140,15 @@ intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
 ttsmaker_query(
-    selected_post, "voice1.mp3", token=args.ttsmaker_token, voice_id=147
+    selected_post, "voice1.mp3", token=args.ttsmaker_token, voice_id=147, speed=1.2, volume=1.3
 )
 ttsmaker_query(
     selected_comment,
     "voice2.mp3",
     token=args.ttsmaker_token,
-    voice_id=147
+    voice_id=147,
+    speed=1.2,
+    volume=1.3
 )
 subs_ai = SubsAI()
 model = subs_ai.create_model("linto-ai/whisper-timestamped", {"segment_type": "word"})
