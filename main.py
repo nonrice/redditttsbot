@@ -4,6 +4,8 @@ from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
 from wand.image import Image
+from wand.color import Color
+from wand.drawing import Drawing
 from ttsmaker_query import ttsmaker_query
 from subsai import SubsAI
 from moviepy.editor import *
@@ -138,6 +140,21 @@ except:
 intro = Image(filename="intro.png")
 intro.resize(args.post_width, int((intro.height / intro.width) * args.post_width))
 intro.crop(1, 2, intro.width - 2, intro.height - 2)
+
+with Image(width=intro.width,
+            height=intro.height,
+            background=Color("transparent")) as mask:
+
+    with Drawing() as ctx:
+        ctx.fill_color = Color("white")
+        ctx.rectangle(left=0,
+                        top=0,
+                        width=mask.width,
+                        height=mask.height,
+                        radius=mask.width*0.01)  # 10% rounding?
+        ctx(mask)
+    intro.composite_channel("alpha", mask, "dst_in")
+
 intro.save(filename="intro.png")
 
 # Generate TTS and subtitles
