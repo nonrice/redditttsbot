@@ -122,6 +122,9 @@ try:
     driver.execute_script(
         f'document.getElementById("t3_{post_id}").style.maxWidth="{args.post_content_max_width}ch"'
     )
+    driver.execute_script(
+        f'document.getElementById("t3_{post_id}").style.padding="{args.post_content_padding}ch"'
+    )
     if args.use_post:
         driver.execute_script(
             'for (const ele of document.getElementsByTagName("p")){\nele.style.display="none";\n}'
