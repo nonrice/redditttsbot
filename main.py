@@ -30,7 +30,6 @@ parser.add_argument("--subtitle-color", action="store", default="white")
 parser.add_argument("--subtitle-outline-color", action="store", default="black")
 parser.add_argument("--post-width", action="store", default=1000, type=int)
 parser.add_argument("--post-content-max-width", action="store", default=60, type=int)
-parser.add_argument("--post-content-padding", action="store", default=3, type=int)
 parser.add_argument("--only-video", action="store_true")
 parser.add_argument("--video-tags", action="store", default="")
 parser.add_argument("--title-before", action="store", default="")
@@ -124,9 +123,6 @@ try:
     )
     driver.execute_script(
         f'document.getElementById("t3_{post_id}").parentElement.style.padding="3ch"'
-    )
-    driver.execute_script(
-        f'document.getElementById("t3_{post_id}").style.padding="{args.post_content_padding}ch"'
     )
     if args.use_post:
         driver.execute_script(
